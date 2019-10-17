@@ -1,0 +1,212 @@
+
+;; python mode
+(setq org-babel-python-command
+      (if (memq system-type '(windows-nt ms-dos))
+          "Python"
+        "python3 -q"))
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+
+;; Custom theme
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ansi-color-names-vector
+   ["#212526" "#ff4b4b" "#b4fa70" "#fce94f" "#729fcf" "#e090d7" "#8cc4ff" "#eeeeec"])
+ '(custom-enabled-themes (quote (deeper-blue)))
+ '(package-selected-packages
+   (quote
+    (cython-mode exec-path-from-shell htmlize auctex ess)))
+ '(safe-local-variable-values
+   (quote
+    ((eval with-eval-after-load "ox-latex" eval:
+	   (add-to-list
+	    (quote org-latex-classes)
+	    eval:
+	    (quote
+	     ("my_article" "\\documentclass{scrartcl}" eval:
+	      ("\\section{%s}" . "\\section*{%s}")
+	      eval:
+	      ("\\subsection{%s}" . "\\subsection*{%s}")
+	      eval:
+	      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+	      eval:
+	      ("\\paragraph{%s}" . "\\paragraph*{%s}")
+	      eval:
+	      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))))
+     (eval require
+	   (quote org-install))))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(flyspell-incorrect ((t (:inverse-video t)))))
+
+
+;; Use melpa
+(package-initialize)
+(add-to-list 'load-path "~/src/org-mode/lisp")
+;;(add-to-list 'load-path "~/src/org-mode/contrib/lisp")
+(add-to-list 'package-archives
+		 '("melpa-stable" . "http://stable.melpa.org/packages/"))
+(add-to-list 'package-archives
+		 '("melpa" . "http://melpa.org/packages/"))
+(package-refresh-contents)
+(setq package-archive-priorities '(("gnu" . 100)
+                                   ("melpa-stable" . 10)))
+
+;; Install missing packages
+(dolist (pkg '(ess
+               auctex
+               htmlize
+               exec-path-from-shell))
+  (when (not (package-installed-p pkg))
+    (package-install pkg)))
+
+;; Org-mode config
+(exec-path-from-shell-initialize)
+(exec-path-from-shell-copy-env "PYTHONPATH")
+(require 'org)
+(require 'ess-site)
+(setq inhibit-startup-screen t)
+
+;; Change window name
+(setq frame-title-format
+  '("Emacs - " (buffer-file-name "%f"
+    (dired-directory dired-directory "%b"))))
+
+(global-font-lock-mode t)
+
+
+(line-number-mode 1)
+(column-number-mode 1)
+
+(load-library "paren")
+(show-paren-mode 1)
+(transient-mark-mode t)
+(require 'paren)
+
+
+  
+
+;; UTF 8
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+
+;; Programmation languages
+;;(setq org-babel-python-command "python3")
+(setq org-confirm-babel-evaluate nil) ;; Do not ask for confirmation all the time!!
+(org-babel-do-load-languages
+  'org-babel-load-languages
+  '(
+    (emacs-lisp . t)
+    (sh . t)
+    (python . t)
+    (C . t)
+    (R . t)
+    (org . t)
+    (makefile . t)
+    ))
+
+
+  (setq org-src-preserve-indentation t)
+
+(require 'org-tempo nil t)
+
+;; Auto-fill
+(defun auto-fill-mode-on () (TeX-PDF-mode 1))
+(add-hook 'tex-mode-hook 'TeX-PDF-mode-on)
+(add-hook 'latex-mode-hook 'TeX-PDF-mode-on)
+(setq TeX-PDF-mode t)
+
+(defun auto-fill-mode-on () (auto-fill-mode 1))
+(add-hook 'text-mode-hook 'auto-fill-mode-on)
+(add-hook 'emacs-lisp-mode 'auto-fill-mode-on)
+(add-hook 'tex-mode-hook 'auto-fill-mode-on)
+(add-hook 'latex-mode-hook 'auto-fill-mode-on)
+
+
+;; Org-m options
+(setq org-directory "~/org/")
+(setq org-hide-leading-stars t)
+(setq org-alphabetical-lists t)
+(setq org-src-fontify-natively t)  ;; you want this to activate coloring in blocks
+(setq org-src-tab-acts-natively t) ;; you want this to have completion in blocks
+(setq org-hide-emphasis-markers t) ;; to hide the *,=, or / markers
+(setq org-pretty-entities t)       ;; to have \alpha, \to and others display as utf8 http://orgmode.org/manual/Special-symbols.html
+
+
+;; Languages shortcuts
+(add-to-list 'org-structure-template-alist
+	     '("s" . "src"))
+(add-to-list 'org-structure-template-alist
+        '("m" . "src emacs-lisp :tangle init.el"))
+
+;; Python Shortcuts
+(add-to-list 'org-structure-template-alist
+        '("p" . "src python :results output :exports both"))
+
+(add-to-list 'org-structure-template-alist
+        '("P" .  "src python :results output :session :exports both"))
+
+(add-to-list 'org-structure-template-alist
+	     '("PP" . "src python :results file :session :var matplot_lib_filename=(org-babel-temp-file \"figure\" \".png\") :exports both\nimport matplotlib.pyplot as plt\n\nimport numpy\nx=numpy.linspace(-15,15)\nplt.figure(figsize=(10,5))\nplt.plot(x,numpy.cos(x)/x)\nplt.tight_layout()\n\nplt.savefig(matplot_lib_filename)\nmatplot_lib_filename\n"))
+
+;; Shell shortcuts
+(if (memq system-type '(windows-nt ms-dos))
+    ;; Non-session shell execution does not seem to work under Windows, so we use
+    ;; a named session just like for B.
+    (add-to-list 'org-structure-template-alist
+                 '("b" . "src sh :session session :results output :exports both"))
+  (add-to-list 'org-structure-template-alist
+               '("b" . "src sh :results output :exports both")))
+
+
+(add-to-list 'org-structure-template-alist
+        '("B" . "src sh :session *shell* :results output :exports both"))
+
+(add-to-list 'org-structure-template-alist
+        '("g" . "src dot :results output graphics :file \"/tmp/graph.pdf\" :exports both
+   digraph G {
+      node [color=black,fillcolor=white,shape=rectangle,style=filled,fontname=\"Helvetica\"];
+      A[label=\"A\"]
+      B[label=\"B\"]
+      A->B
+   }\n"))
+
+(global-set-key (kbd "C-c S-t") 'org-babel-execute-subtree)
+
+(add-hook 'org-babel-after-execute-hook 'org-display-inline-images) 
+(add-hook 'org-mode-hook 'org-display-inline-images)
+(add-hook 'org-mode-hook 'org-babel-result-hide-all)
+
+(setq python-shell-completion-native-enable nil)
+
+;; Latex Export
+(require 'org)
+(require 'ox-latex)
+(add-to-list 'org-latex-packages-alist '("" "listingsutf8"))
+(setq org-latex-listings 'listings)
+
+(setq org-latex-pdf-process
+      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+
+(setq org-src-fontify-natively t)
+
+(with-eval-after-load "ox-latex"
+  (add-to-list 'org-latex-classes
+	       '("my_article" "\\documentclass{scrartcl}"
+		 ("\\section{%s}" . "\\section*{%s}")
+		 ("\\subsection{%s}" . "\\subsection*{%s}")
+		 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+		 ("\\paragraph{%s}" . "\\paragraph*{%s}")
+		 ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
